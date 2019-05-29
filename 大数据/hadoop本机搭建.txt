@@ -1,0 +1,80 @@
+hadoop本机搭建
+
+Mac Air 系统
+
+1、brew install hadoop
+
+2、修改配置
+
+2.1 hadoop-env.sh 设置JAVA_HOME
+
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_40.jdk/Contents/Home
+
+2.2 修改 core-site.xml
+
+公共属性配置，HDFS和MapReduce组件都需要用到它
+
+<configuration>
+    <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/usr/local/Cellar/hadoop/hdfs/tmp</value>
+        <description>A base for other temporary directories.</description>
+    </property>
+    <property>
+        <name>fs.default.name</name>
+        <value>hdfs://localhost:9000</value>
+    </property>
+</configuration>
+
+2.3 hdfs-site.xml
+
+变量dfs.replication指定了每个HDFS默认备份方式通常为3, 由于我们只有一台主机和一个伪分布式模式的DataNode，将此值修改为1。
+
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+
+    <property>
+        <name>dfs.namenode.http-address</name>
+        <value>localhost:50070</value>
+	</property>
+</configuration>
+
+2.4 mapred-site.xml
+
+变量mapred.job.tracker 保存了JobTracker的位置
+
+<configuration>
+    <property>
+        <name>mapred.job.tracker</name>
+        <value>localhost:9010</value>
+    </property>
+</configuration>
+
+3、格式化HDFS文件系统
+
+hadoop namenode -format
+
+4、启动服务
+
+ ./start-all.sh
+
+ ./start-dfs.sh
+ ./start-yarn.sh
+
+5.查看进程
+
+sbin jps
+
+通过访问以下网址查看hadoop是否启动成功
+
+Resource Manager: http://localhost:50070
+JobTracker: http://localhost:8088  (http://your-hostname:8088/cluster)
+Specific Node Information: http://localhost:8042
+
+6. 退出
+
+./stop-all.sh
+
