@@ -1,0 +1,33 @@
+1、构建源代码
+
+scp /Users/chenbo/middleware/apache-ambari-2.7.3-src.tar.gz root@172.16.1.136:/data/
+tar xfvz apache-ambari-2.7.3-src.tar.gz
+
+cd apache-ambari-2.7.3-src
+mvn versions:set -DnewVersion=2.7.3.0.0
+
+pushd ambari-metrics
+mvn versions:set -DnewVersion=2.7.3.0.0
+popd
+
+centos：
+mvn -B clean install rpm:rpm -DnewVersion=2.7.3.0.0 -DbuildNumber=4295bb16c439cbc8fb0e7362f19768dde1477868 -DskipTests -Dpython.ver="python >= 2.6"
+
+2、安装Ambari Server
+
+从ambari-server / target / rpm / ambari-server / RPMS / noarch /安装rpm包
+
+CentOS：
+yum install ambari-server*.rpm
+
+3、设置并启动Ambari Server
+运行setup命令以配置Ambari服务器，数据库，JDK，LDAP和其他选项
+
+ambari-server setup (按照屏幕上的说明继续操作)
+
+ambari-server start (设置完成后，启动Ambari Server)
+
+4、
+
+
+scp /Users/chenbo/middleware/apache-kylin-2.6.2-bin-hadoop3 root@172.16.1.134:/home/data/

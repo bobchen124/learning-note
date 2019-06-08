@@ -1,0 +1,106 @@
+Ambari-Server:
+Hostname: ambari.server
+
+代理：
+Hostname01: hadoop.master
+Hostname02: hadoop.datanode1
+Hostname03: hadoop.datanode2
+Hostname04: hadoop.datanode3
+
+
+vim /etc/hosts
+
+172.16.1.136     ambari.server
+172.16.1.112     hadoop.master
+172.16.1.113     hadoop.datanode1
+172.16.1.122     hadoop.datanode2
+172.16.1.123     hadoop.datanode3
+172.16.1.132     kafka.one
+172.16.1.133     kafka.two
+172.16.1.134     kylin.one
+172.16.1.135     kylin.two
+
+修改机器名、Hosts文件
+hostnamectl set-hostname kylin.two
+
+reboot #重启服务器
+
+设置ntpd自动启动
+
+yum install -y ntp
+systemctl enable ntpd
+systemctl start ntpd
+
+关闭防火墙
+systemctl stop firewalld
+systemctl disable firewalld
+
+SSH免密登陆
+
+ssh-keygen -t rsa
+
+	1)发送公钥给目标服务器
+	scp ~/.ssh/id_rsa.pub kylin.two:/root/.ssh/authorized_keys_from_ambari
+
+	2)在被登录的服务器上，合并公钥
+	cd ~/.ssh
+	cat authorized_keys_from_ambari >> authorized_keys
+
+	3)对所有服务器上的.ssh目录和文件授权：
+	chmod 700 ~/.ssh
+	chmod 600 ~/.ssh/*
+
+	4)验证SHH可以免密码登录目标服务器
+	ssh kafka.one
+
+
+JAVA_HOME: /usr/java/jdk1.8.0_131
+
+
+Mysql驱动：
+yum install -y mysql-connector-java
+目录： /usr/share/java/mysql-connector-java.jar
+
+Mysql账号：
+
+CREATE USER 'hive'@'%' IDENTIFIED BY 'Hive_1234';
+GRANT ALL PRIVILEGES ON *.* TO 'hive'@'%';
+
+CREATE USER 'ambari'@'%' IDENTIFIED BY 'Ambari_1234';
+GRANT ALL PRIVILEGES ON *.* TO 'ambari'@'%';
+
+FLUSH PRIVILEGES;
+
+下载安装包
+wget -nv http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.3.0/ambari.repo -O /etc/yum.repos.d/ambari.repo
+wget -nv http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.3.0/ambari.repo -O /etc/yum.repos.d/ambari.repo
+
+安装Ambari-Server
+yum install -y ambari-server
+
+将Ambari数据库脚本导入到数据库(sql需要修改)
+/var/lib/ambari-server/resources
+
+source /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql;
+
+配置Ambari-Server
+ambari-server setup
+
+参数：
+	1) --jdbc-db  驱动位置
+	ambari-server setup --jdbc-db=mysql --jdbc-driver=/usr/share/java/mysql-connector-java.jar
+
+启动ambari-server服务
+ambari-server start
+
+安装ambari-agent
+scp /etc/yum.repos.d/ambari.repo hadoop.master:/etc/yum.repos.d/
+yum install -y ambari-agent
+chkconfig --add ambari-agent
+
+vim /etc/ambari-agent/conf/ambari.ini
+
+[server]
+hostname=ambari.server
+
+ambari-agent start
