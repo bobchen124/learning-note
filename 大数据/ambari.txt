@@ -23,8 +23,6 @@ vim /etc/hosts
 修改机器名、Hosts文件
 hostnamectl set-hostname kylin.two
 
-reboot #重启服务器
-
 设置ntpd自动启动
 
 yum install -y ntp
@@ -39,8 +37,8 @@ SSH免密登陆
 
 ssh-keygen -t rsa
 
-	1)发送公钥给目标服务器
-	scp ~/.ssh/id_rsa.pub kylin.two:/root/.ssh/authorized_keys_from_ambari
+	1)发送公钥给目标服务器(ambari)
+	scp ~/.ssh/id_rsa.pub kylin.three:/root/.ssh/authorized_keys_from_ambari
 
 	2)在被登录的服务器上，合并公钥
 	cd ~/.ssh
@@ -53,6 +51,7 @@ ssh-keygen -t rsa
 	4)验证SHH可以免密码登录目标服务器
 	ssh kafka.one
 
+reboot #重启服务器
 
 JAVA_HOME: /usr/java/jdk1.8.0_131
 
@@ -104,3 +103,6 @@ vim /etc/ambari-agent/conf/ambari.ini
 hostname=ambari.server
 
 ambari-agent start
+
+
+
